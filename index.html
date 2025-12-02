@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles.css">
+    <title>YouTube Video Looper</title>
+
+
+    <script async src="https://www.youtube.com/iframe_api"></script>
+    <script async src="script.js"></script>
+
+</head>
+
+<body>
+
+<div class="container">
+    <input class="url-input" autofocus oninput="loadVideo()" type="text" id="videoUrl" placeholder="Enter YouTube video URL">
+</div>
+    <div id="player" allow="autoplay; encrypted-media; gyroscope; picture-in-picture; web-share; clipboard-write"></div>
+    <div class="progress-bar-container">
+        <div class="progress-bar"></div>
+    </div>
+    <div class="loop-controls">
+        <div>
+            <ul class="loop-control-container">
+                <div class="border-around-timeinput">
+                    <li><label for="startTime">Loop start time:</label></li>
+                    <li><input class="time-input" type="number" id="startTime" value="0"></li>
+                </div>
+                <li>
+                    <div class="loop-control-buttons">
+                        <button id="startTimeMinusBig">-5s</button>
+                        <button id="startTimeMinusMedium">-1s</button>
+                        <button id="startTimeMinusSmall">-0.1s</button>
+                        <button id="startTimePlusSmall">+0.1s</button>
+                        <button id="startTimePlusMedium">+1s</button>
+                        <button id="startTimePlusBig">+5s</button>
+                    </div>             
+                </li>
+            </ul>
+        </div>
+        <div>
+            <ul class="loop-control-container">
+                <div class="border-around-timeinput">
+                    <li><label for="endTime">Loop end time:</label></li>
+                    <li><input class="time-input" type="number" id="endTime" value="0"></li>
+                </div>
+                <li>
+                    <div class="loop-control-buttons">
+                        <button id="endTimeMinusBig">-5s</button>
+                        <button id="endTimeMinusMedium">-1s</button>
+                        <button id="endTimeMinusSmall">-0.1s</button>
+                        <button id="endTimePlusSmall">+0.1s</button>
+                        <button id="endTimePlusMedium">+1s</button>
+                        <button id="endTimePlusBig">+5s</button>
+                    </div>
+                </li>
+            </ul>
+            
+        </div>
+        <div>
+            <ul class="loop-control-container">
+                <div class="border-around-timeinput">
+                    <li><label for="pauseTime">Wait between loops:</label></li>
+                    <li><input class="time-input" type="number" id="pauseTime" value="0"></li>
+                </div>
+                <div class="loop-control-buttons">
+                    <button id="setPauseTimeBtn">Set wait time equal to sentence length</button>
+                </div>
+                <li class="container-for-set-to-current-time-buttons loop-control-buttons">
+                        <button id="setLoopStart">Set loop start to current time</button>
+                        <button id="setLoopEnd">Set loop end to current time</button>
+                        <button id="toggleLoopButton">Start looping</button> 
+                </li>
+            </ul>
+        </div>      
+    </div>
+</body>
+
+</html>

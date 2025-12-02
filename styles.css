@@ -1,0 +1,263 @@
+body {
+    background-color: #333333;
+    color: #c7c2c2;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+}
+
+#player {
+    max-width: 1280px;
+    width: 80vw;
+    height: 45vw;
+    max-height: 720px;
+    border: 1px solid #c7c2c2;
+    border-radius: 8px;
+}
+
+.progress-bar-container {
+    max-width: 1280px;
+    width: 80vw;
+    height: 18px;
+    display: flex;
+    writing-mode: vertical-rl;
+}
+
+.progress-bar {
+    max-width: 1280px;
+    width: 80vw;
+    height: 8px;
+    border-radius: 8px;
+    background-image: linear-gradient(to right, #ffcc00, #ff8300);
+    margin-bottom: 5px;
+    margin-top: 5px;
+    display: block;
+    align-self: flex-end;
+}
+
+.container {
+    margin-bottom: 20px;
+}
+
+
+.loop-controls {
+    max-width: 1280px;
+    width: 80vw;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.loop-control-container {
+    text-align: center;
+    border: 1px solid #c7c2c2;
+    border-radius: 8px;
+    width: 330px;
+    margin-bottom: 4px;
+}
+
+.loop-control-buttons button {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    border: 1px solid #c7c2c2;
+    background-color: #333333;
+    color: #c7c2c2;
+    margin-top: 8px;
+    margin-left: 2px;
+    margin-right: 2px;
+}
+
+.loop-control-buttons button:hover {
+    border: 1px solid #ffcc00;
+    color: #ffcc00;
+    cursor: pointer;
+}
+
+.loop-control-buttons button:active {
+    transform: scale(0.95);
+}
+
+/*
+Focus-visible is only applied when the user focuses the button by pressing tab.
+This is intentional, because using normal focus would cause the styles to remain
+on the button after it was pressed. 
+*/
+.loop-control-buttons button:focus-visible {
+    border: 1px solid #ffcc00;
+    color: #ffcc00;
+    outline: 1px solid #ffcc00;
+}
+
+.loop-controls div {
+    display: inline-table;
+}
+
+.time-input {
+    background-color: #333333;
+    border: 0px solid #c7c2c2;
+    height: 30px;
+    width: 120px;
+    border-radius: 8px;
+    color: #c7c2c2;
+    text-align: center;
+    font-size: 20px;
+}
+
+.time-input:hover {
+    border: 0px solid #c7c2c2;
+    color: #ffcc00;
+}
+
+.time-input:active {
+    border: 0px solid #c7c2c2;
+    outline: none;
+    color: #ffcc00;
+}
+
+.time-input:focus {
+    border: 0px solid #c7c2c2;
+    outline: none;
+    color: #ffcc00;
+}
+
+.time-input::selection {
+    color: #ffcc00; 
+    background-color: #806000;
+}
+
+.url-input {
+    background-color: #333333;
+    border: 1px solid #c7c2c2;
+    height: 30px;
+    border-radius: 8px;
+    color: #c7c2c2;
+    text-align: center;
+    font-size: 20px;
+    line-height: 24px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    padding-left: 12px;
+    padding-right: 12px;
+    border-radius: 8px;
+}
+
+.url-input::placeholder {
+    color: #c7c2c2;
+}
+
+.url-input:hover {
+    border: 1px solid #ffcc00;
+    color: #ffcc00;
+}
+
+.url-input:active {
+    border: 1px solid #ffcc00;
+    outline: none;
+    color: #ffcc00;
+}
+
+.url-input:hover::placeholder,
+.url-input:active::placeholder,
+.url-input:focus::placeholder {
+    color: #ffcc00;
+}
+
+.url-input:focus {
+    border: 1px solid #ffcc00;
+    outline: none;
+    color: #ffcc00;
+}
+
+.url-input::selection {
+    color: #ffcc00; 
+    background-color: #806000;
+}
+
+.border-around-timeinput:focus-within label {
+    color: #ffcc00;
+    cursor: text;
+}
+
+.border-around-timeinput {
+    border: 1px solid #c7c2c2;
+    border-radius: 8px;
+    padding: 8px;
+    cursor: text;
+}
+
+.border-around-timeinput:hover {
+    border: 1px solid #ffcc00;
+}
+
+.border-around-timeinput:focus-within {
+    border: 1px solid #ffcc00;
+}
+
+.border-around-timeinput:hover label {
+    color: #ffcc00; 
+    cursor: text;
+}
+.border-around-timeinput:hover .time-input {
+    color: #ffcc00; 
+}
+
+
+ul {
+    display: inline-block;
+    list-style-type: none;
+    padding-inline-start: 0;
+    margin: 0;
+    padding: 8px;
+}
+
+li {
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+.container-for-set-to-current-time-buttons {
+    display: flex;
+    justify-content: space-around;
+}
+
+.inner-container-for-set-to-current-time-buttons {
+    display: inline-block;
+}
+
+#setLoopStart,
+#setLoopEnd,
+#toggleLoopButton {
+    width: 100px;
+    padding-right: 4px;
+    padding-left: 4px;
+}
+
+#setPauseTimeBtn {
+    height: 68px;
+    width: 153px;
+    margin-top: -9px;
+    vertical-align: text-top;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+
+/* Hide arrows for number inputs for Chrome, Safari, and Opera */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Hide arrows for number inputs for Firefox */
+input[type="number"] {
+    -moz-appearance: textfield;
+}
