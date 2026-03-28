@@ -1,12 +1,24 @@
 //youtube looper prototype
 
 let player;
-let startTime = 0;
-let endTime = 0;
-let pauseTime = 0;
+let loopStartTime = 0;
+let loopEndTime = 0;
+let loopPauseTime = 0;
 let looping = false;
 
-function createPlayer(id) {
+
+function getUriFragmentParams() {
+    const hash = window.location.hash.substring(1); // remove #
+    const params = new URLSearchParams(hash);
+
+    return {
+        url: params.get("url"),
+        t: params.get("t")
+    };
+}
+
+function createPlayer(id, startSeconds) {
+    console.log(id)
     player = new YT.Player('player', {
            height: '390',
            width: '640',
@@ -15,9 +27,12 @@ function createPlayer(id) {
              'playsinline': 1
            },
            events: {
-             'onReady': onPlayerReady,
-             'onError': onPlayerError
-           }
+            'onReady': function(event) {
+                event.target.seekTo(startSeconds);
+                event.target.playVideo();
+            },
+            'onError': onPlayerError
+            }
       });
 }
 
@@ -31,26 +46,73 @@ function onPlayerError(error) {
 
 function loadVideo() {
     let videoUrl = document.getElementById("videoUrl").value;
-    let videoId = extractVideoId(videoUrl);
+
+    const { videoId, startSeconds } = extractVideoIdAndStartTime(videoUrl);
+
     if (!player) {
-        createPlayer(videoId);
+        createPlayer(videoId, startSeconds);
     } else {
-        player.loadVideoById(videoId);
-        //stop looping if we're looping while loading a new video
-        if(looping) {
+        player.loadVideoById({
+            videoId: videoId,
+            startSeconds: startSeconds
+        });
+
+        if (looping) {
             toggleLoop();
         }
     }
-    
 }
 
-function extractVideoId(url) {
-    let videoId = url.split('v=')[1];
-    let ampersandPosition = videoId.indexOf('&');
-    if (ampersandPosition !== -1) {
-        videoId = videoId.substring(0, ampersandPosition);
+function extractVideoIdAndStartTime(input) {
+    let videoId = null;
+    let startSeconds = 0;
+
+    if (!input) return { videoId: null, startSeconds: 0 };
+
+    const url = input.trim();
+
+    // Case 1: youtu.be link
+    if (url.includes("youtu.be/")) {
+        videoId = url.split("youtu.be/")[1].split(/[?&]/)[0];
+    } 
+    // Case 2: youtube.com link
+    else if (url.includes("v=")) {
+        videoId = url.split("v=")[1].split("&")[0];
+    } 
+    // Case 3: raw video ID
+    else {
+        // Basic sanity check: YouTube IDs are 11 chars
+        if (/^[a-zA-Z0-9_-]{11}$/.test(url)) {
+            videoId = url;
+        }
     }
-    return videoId;
+
+    // Extract timestamp from URL-style input
+    const tMatch = url.match(/[?&]t=([^&]+)/);
+    if (tMatch) {
+        startSeconds = parseTimeToSeconds(tMatch[1]);
+    }
+
+    return { videoId, startSeconds };
+}
+
+
+function parseTimeToSeconds(timeString) {
+    if (!timeString) return 0;
+
+    if (!isNaN(timeString)) return parseInt(timeString);
+
+    let total = 0;
+
+    const h = timeString.match(/(\d+)h/);
+    const m = timeString.match(/(\d+)m/);
+    const s = timeString.match(/(\d+)s/);
+
+    if (h) total += parseInt(h[1]) * 3600;
+    if (m) total += parseInt(m[1]) * 60;
+    if (s) total += parseInt(s[1]);
+
+    return total;
 }
 
 
@@ -87,9 +149,9 @@ function setEndTimeNow() {
 function setStartTime(time) {
     if (isNaN(time)) return;
     time = time.toFixed(3);
-    startTime = parseFloat(time);
-    document.getElementById("startTime").value = startTime;
-    player.seekTo(startTime, 1);
+    loopStartTime = parseFloat(time);
+    document.getElementById("startTime").value = loopStartTime;
+    player.seekTo(loopStartTime, 1);
     player.unMute();
     playVideo();
 }
@@ -97,9 +159,9 @@ function setStartTime(time) {
 function setEndTime(time) {
     if (isNaN(time)) return;
     time = time.toFixed(3);
-    endTime = parseFloat(time);
-    document.getElementById("endTime").value = endTime;
-    player.seekTo(endTime - 1);
+    loopEndTime = parseFloat(time);
+    document.getElementById("endTime").value = loopEndTime;
+    player.seekTo(loopEndTime - 1);
     player.unMute();
     playVideo();
     if (!looping) {
@@ -110,18 +172,18 @@ function setEndTime(time) {
 function setPauseTime(time) {
     if (isNaN(time)) return;
     time = time.toFixed(3);
-    pauseTime = parseFloat(time);
-    document.getElementById("pauseTime").value = pauseTime;
+    loopPauseTime = parseFloat(time);
+    document.getElementById("pauseTime").value = loopPauseTime;
 }
 
 function toggleLoop() {
     looping = !looping;
     player.unMute();
     if (looping) {
-        player.seekTo(startTime);
+        player.seekTo(loopStartTime);
         playVideo();
     } else {
-        player.seekTo(endTime);
+        player.seekTo(loopEndTime);
         pauseVideo();
     }
 }
@@ -130,12 +192,12 @@ function loop() {
     let toggleLoopButton = document.getElementById("toggleLoopButton");
     if (looping) {
         document.getElementById("player").style.border = '1px solid #ffcc00';
-        if (startTime < endTime) {
+        if (loopStartTime < loopEndTime) {
             toggleLoopButton.textContent = "Stop looping";
             toggleLoopButton.style.border = "1px solid #ffcc00";
             toggleLoopButton.style.color = "#ffcc00";
             animateLoop();
-        } else if (startTime === endTime) {
+        } else if (loopStartTime === loopEndTime) {
             toggleLoop();
             alert("Error: We're a bit puzzled by your loop - it seems to have come to a standstill with both start and end times being the same. While it's a fascinating concept, loops need a duration to function. Try setting a different start and end time to set your loop in motion.");
         } else {
@@ -154,8 +216,8 @@ function loop() {
 window.requestAnimationFrame(loop);
 
 function animateLoop() {
-    let loopDuration = endTime - startTime + pauseTime;
-    let progress = player.getCurrentTime() - startTime;
+    let loopDuration = loopEndTime - loopStartTime + loopPauseTime;
+    let progress = player.getCurrentTime() - loopStartTime;
     if (waitingBetweenLoops(progress, loopDuration)) {
         /*
         It would make more sense to pause here, but mute was much easier to implement.
@@ -176,7 +238,7 @@ function animateLoop() {
         player.mute(); 
     }
     if (loopHasReachedEnd(progress, loopDuration)) {
-        player.seekTo(startTime);
+        player.seekTo(loopStartTime);
         player.unMute();
     }
     setProgressBarWidth(progress, loopDuration);
@@ -192,7 +254,7 @@ function loopHasReachedEnd(progress, loopDuration) {
 }
 
 function waitingBetweenLoops(progress, loopDuration) {
-    if (progress > (loopDuration - pauseTime) && pauseTime > 0) {
+    if (progress > (loopDuration - loopPauseTime) && loopPauseTime > 0) {
         document.querySelector('.progress-bar').style.backgroundImage = 'linear-gradient(to right, #00e2ff, #0900ff)';
         document.getElementById("player").style.border = '1px solid #00e2ff';
         toggleLoopButton.style.border = "1px solid #00e2ff";
@@ -276,11 +338,21 @@ function toggleMicPlayback() {
     }
 }
 
+window.addEventListener("load", () => {
+    const { url, t } = getUriFragmentParams();
 
+    if (!url) return;
 
+    const { videoId, startSeconds: urlStart } = extractVideoIdAndStartTime(url);
 
+    // If separate &t= param exists, override
+    const paramStart = parseTimeToSeconds(t);
+    const finalStart = paramStart || urlStart;
 
-
+    if (videoId) {
+        createPlayer(videoId, finalStart);
+    }
+});
 
 document.getElementById("endTime").addEventListener("change", function() {
     setEndTime(parseFloat(this.value));
@@ -307,53 +379,53 @@ document.getElementById("toggleLoopButton").addEventListener("click", function()
 });
 
 document.getElementById("startTimeMinusBig").addEventListener("click", function() {
-    setStartTime(startTime - 5);
+    setStartTime(loopStartTime - 5);
 });
 
 document.getElementById("startTimeMinusMedium").addEventListener("click", function() {
-    setStartTime(startTime - 1);
+    setStartTime(loopStartTime - 1);
 });
 
 document.getElementById("startTimeMinusSmall").addEventListener("click", function() {
-    setStartTime(startTime - 0.1);
+    setStartTime(loopStartTime - 0.1);
 });
 
 document.getElementById("startTimePlusSmall").addEventListener("click", function() {
-    setStartTime(startTime + 0.1);
+    setStartTime(loopStartTime + 0.1);
 });
 
 document.getElementById("startTimePlusMedium").addEventListener("click", function() {
-    setStartTime(startTime + 1);
+    setStartTime(loopStartTime + 1);
 });
 
 document.getElementById("startTimePlusBig").addEventListener("click", function() {
-    setStartTime(startTime + 5);
+    setStartTime(loopStartTime + 5);
 });
 
 document.getElementById("endTimeMinusBig").addEventListener("click", function() {
-    setEndTime(endTime - 5);
+    setEndTime(loopEndTime - 5);
 });
 
 document.getElementById("endTimeMinusMedium").addEventListener("click", function() {
-    setEndTime(endTime - 1);
+    setEndTime(loopEndTime - 1);
 });
 
 document.getElementById("endTimeMinusSmall").addEventListener("click", function() {
-    setEndTime(endTime - 0.1);
+    setEndTime(loopEndTime - 0.1);
 });
 
 document.getElementById("endTimePlusSmall").addEventListener("click", function() {
-    setEndTime(endTime + 0.1);
+    setEndTime(loopEndTime + 0.1);
 });
 
 document.getElementById("endTimePlusMedium").addEventListener("click", function() {
-    setEndTime(endTime + 1);
+    setEndTime(loopEndTime + 1);
 });
 
 document.getElementById("endTimePlusBig").addEventListener("click", function() {
-    setEndTime(endTime + 5);
+    setEndTime(loopEndTime + 5);
 });
 
 document.getElementById("setPauseTimeBtn").addEventListener("click", function() {
-    setPauseTime((endTime - startTime));
+    setPauseTime((loopEndTime - loopStartTime));
 });
